@@ -79,7 +79,7 @@
             vt.setCurrentPath(curPath);
         },
         mounted() {
-            this.onLeftmenuSelectEvent('watermark');
+            this.onLeftmenuSelectEvent('/');
         },
         methods: {
             //左侧菜单点击事件

@@ -294,7 +294,6 @@ export default {
         if(ab.length <= 2){
             ab = itmestr.split(",");
         }
-        console.log(ab);
         if(itmestr == null && ab == null){
             return 0;
         }

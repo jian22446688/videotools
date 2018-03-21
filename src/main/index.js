@@ -57,7 +57,14 @@ ipc.on('open-file-dialog', function (event) {
  * 通用事件通知
  */
 ipc.on('openfileeven', function (event, arg) {
+    var pro = null;
+    if(process.platform == "win32"){
+        pro = null;
+    }else {
+        pro = ['openFile', 'openDirectory']
+    }
     dialog.showOpenDialog(mainWindow, {
+        properties: pro
     }, function (files) {
         if (files) event.sender.send(arg, files)
     })

@@ -185,7 +185,6 @@
                     this.$Notice.error({title: '必须要选择一个视频文件或者视频文件夹。。。', })
                     return
                 }
-                this.isBtnkey = true;
                 var headNumber = 0;
                 var objes = [];
                 if(this.seleceHeadName != "未选择"){
@@ -248,6 +247,7 @@
                         }
                     })
                 });
+                this.isBtnkey = true;
                 data.setIsClikcMenu(false);
             },
             oneVideo(obj, cabk){
@@ -261,6 +261,8 @@
                         duration = vt.toSecond(data.duration);
                     }).on('error', function(err, stdout, stderr) {
                         thia.$Notice.error({ title: '转码错误' });
+                    thia.isBtnkey = false;
+                    date.setIsClikcMenu(true);
                     }).on('progress', function(progress) {
                         let per = (vt.toSecond(progress.timemark) / duration) * 100;
                         if(per > 100){

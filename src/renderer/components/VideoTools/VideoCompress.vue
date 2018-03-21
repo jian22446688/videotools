@@ -43,12 +43,6 @@
             </div>
             <Table border height="245" :columns="percentTable" size="small" :data="percentData"></Table>
         </div>
-        <Modal title="提示"
-               v-model="modalDeleteTic"
-               :mask-closable="false"
-                @on-ok="deleTicEvent">
-            <p>保存目录有相同的文件是否删除</p>
-        </Modal>
     </div>
 </template>
 
@@ -78,7 +72,6 @@
               inputName: false,
               seleSaveText: "",
               selecSavePath: "",
-              modalDeleteTic: false,
               isOpenfile: false,
               cityList: cdata.cityList,
               isChangeVideoSize: false,
@@ -225,52 +218,34 @@
             oneVideo(selefile, savepath){
                 var deferred = q.defer();
                 var thia = this;
-                if(!vt.fsExistsSync(savepath)){
-                    var objper = {
-                        name: savepath,
-                        percent: 0
-                    }
-                    let objffmpeg = vt.getFfmpeg(selefile);
-                    let duration = 0;
-                    if(thia.isChangeVideoSize){
-                        objffmpeg.size(thia.curVideoSize.replace('*', 'x')).autopad();
-                    }
-                    objffmpeg.on('error', function(err, stdout, stderr) {
-                        thia.$Notice.error({ title: '转换失败', desc: " 转换失败：" + path.basename(selefile) });
-                        deferred.resolve( "导出错误：");
-                    }).on('codecData', function(data) {
-                        console.log(data)
-                        duration = vt.toSecond(data.duration);
-                    }).on('progress', function(progress) {
-                        objper.percent = Math.round((vt.toSecond(progress.timemark) / duration) * 100)
-                    }).on('end', function() {
-                        thia.$Notice.success({ title: '转换成功', desc: "转换成功" + path.basename(selefile) });
-                        thia.isBtnkey = false;
-                        cdata.setIsClikcMenu(true);
-                        deferred.resolve("导出完成");
-                    }).save(savepath);
-                    thia.percentData.unshift(objper);
-                }else {
-                    this.modalDeleteTic = true;
+                //删除文件
+                if(vt.fsExistsSync(savepath)) {vt.fsUnlinkSync(savepath);}
+                var objper = { name: savepath, percent: 0 }
+                let objffmpeg = vt.getFfmpeg(selefile);
+                let duration = 0;
+                if(thia.isChangeVideoSize){
+                    objffmpeg.size(thia.curVideoSize.replace('*', 'x')).autopad();
                 }
+                objffmpeg.on('error', function(err, stdout, stderr) {
+                    thia.isBtnkey = false;
+                    cdata.setIsClikcMenu(true);
+                    thia.$Notice.error({ title: '转换失败', desc: " 转换失败：" + path.basename(selefile) });
+                    deferred.resolve( "导出错误：");
+                }).on('codecData', function(data) {
+                    duration = vt.toSecond(data.duration);
+                }).on('progress', function(progress) {
+                    objper.percent = Math.round((vt.toSecond(progress.timemark) / duration) * 100)
+                }).on('end', function() {
+                    thia.$Notice.success({ title: '转换成功', desc: "转换成功" + path.basename(selefile) });
+                    thia.isBtnkey = false;
+                    cdata.setIsClikcMenu(true);
+                    deferred.resolve("导出完成");
+                }).save(savepath);
+                thia.percentData.unshift(objper);
                 return deferred.promise;
-            },
-            //删除回调
-            deleTicEvent(){
-                if(vt.fsUnlinkSync(this.seleSaveText)){
-                    this.$Message.success('文件删除失败');
-                }else{
-                    this.$Message.error('文件删除成功');
-                    this.onstart();
-                }
             },
             ontest(){
                 console.log(process.platform);
-                console.log("aaaaaaaaaaaaaaaaaaaaa")
-                console.log(path.join('C:\\Users\\Cary\\Desktop\\temp_Video.txt')); //-safe 0
-            //  <Button  style=" position: absolute; right: 20px; top: 80px" type="primary" size="large" @click="ontest">测试</Button>
-// C:\Users\Cary\Desktop\vtools\static\ffmpeg.exe -f concat -i C:\Users\Cary\Desktop\temp_Video.txt -c copy C:\Users\Cary\Desktop\33.mp4
-
             },
         }
     }
