@@ -248,8 +248,8 @@
                 if(vt.fsExistsSync(savepath)) {vt.fsUnlinkSync(savepath);}
                 var objper = { name: savepath, percent: 0 }
                 let duration = 0;
-                vt.getFfmpeg(selefile).outputOptions(
-                    '-vf',"movie="+ logofile +"  [logo]; [in][logo] overlay="+ thia.inLogoX +":"+ thia.inLogoY +" [out]",
+                vt.getFfmpeg(path.join(selefile)).outputOptions(
+                    '-vf',"movie="+ path.join(logofile) +"  [logo]; [in][logo] overlay="+ thia.inLogoX +":"+ thia.inLogoY +" [out]",
                 ).on('error', function(err, stdout, stderr) {
                     thia.$Notice.error({ title: '转换失败', desc: " 转换失败：" + path.basename(selefile) });
                     deferred.resolve( "导出错误：");
