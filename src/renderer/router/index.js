@@ -25,6 +25,11 @@ export default new Router({
                     path:'/videocombine',
                     name: 'videocombine',
                     component: require('@/components/VideoTools/VideoCombine').default
+                },
+                {
+                    path:'/watermark',
+                    name: 'watermark',
+                    component: require('@/components/VideoTools/Watermark').default
                 }
             ]
         },

@@ -1,6 +1,6 @@
 {
   "name": "videotools",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "cary",
   "description": "An electron-vue project",
   "license": null,
@@ -17,11 +17,14 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "视频处理工具",
+    "productName": "videotools",
     "appId": "top.pyge.videotools",
     "directories": {
       "output": "build"
     },
+    "extraResources": [
+      "static/**/*"
+    ],
     "files": [
       "dist/electron/**/*"
     ],
@@ -51,7 +54,9 @@
     }
   },
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "axios": "^0.16.1",
+    "fluent-ffmpeg": "^2.1.2",
     "iview": "^2.10.0-rc.1",
     "queue-fun": "^0.3.2",
     "vue": "^2.3.3",
@@ -74,10 +79,10 @@
     "css-loader": "^0.28.4",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^1.7.5",
+    "electron": "^1.8.4",
+    "electron-builder": "^19.19.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
-    "electron-builder": "^19.19.1",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "html-webpack-plugin": "^2.30.1",

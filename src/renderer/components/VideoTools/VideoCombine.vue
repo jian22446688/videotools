@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h2 class="c-objpadding" style="text-align: center">视频拼接</h2>
         <div>
             <h3 class="c-objpadding">请选择处理的视频文件</h3>
            <div>
@@ -26,7 +27,6 @@
             <Button :disabled="isBtnkey" class="c-objpadding" @click="onSelectSaveFile">选择保存文件夹</Button>
             <span v-text="seleSaveText">未选择保存文件夹，默认视频当前文件夹</span>
             <Button :disabled="isBtnkey" class="c-objpadding" style="display: block" type="primary" size="large" @click="onBtnStart">开始</Button>
-            <Button class="c-objpadding" style="position: absolute; top: 81px; right: 10px" size="large" @click="ontest">测试</Button>
             <div class="c-objpadding">
                 <span v-if="inputName">
                     <span>转换完成是否打开文件夹</span>
@@ -54,10 +54,10 @@
     //实列化一个最大并发为1的队列
     var queue1 = new Queue(1);
 
-    var vheadPath = path.resolve('./') + "/static/temp/temp_vheadVideo.mp4";
-    var vendingPath = path.resolve('./') + "/static/temp/temp_vengingVideo.mp4";
-    var vbine = path.resolve('./') + "/static/temp/temp_Video.txt";
-    var vtempPath = path.resolve('./') + "/static/temp/temp_Video.mp4";
+    var vheadPath = "temp/temp_vheadVideo.mp4";
+    var vendingPath = "temp/temp_vengingVideo.mp4";
+    var vbine ="temp_Video.txt";
+    var vtempPath ="temp/temp_Video.mp4";
     export default {
         name: "video-combine",
         props: [],
@@ -177,7 +177,6 @@
             },
             onBtnStart(){
                 var thia = this;
-                this.isBtnkey = true;
                 if(!(this.seleceHeadName != "未选择") && !(this.seleceEndingName != "未选择")){
                     this.$Notice.error({title: '请选择一个片头或者片尾。。。', });
                     return;
@@ -186,13 +185,13 @@
                     this.$Notice.error({title: '必须要选择一个视频文件或者视频文件夹。。。', })
                     return
                 }
+                this.isBtnkey = true;
                 var headNumber = 0;
                 var objes = [];
-
                 if(this.seleceHeadName != "未选择"){
                     var obje = {
                         videoPath: this.seleceHeadName,
-                        outPath: vheadPath,
+                        outPath: vt.getCurrentPath() + vheadPath,
                         videoSize: this.videoSize,
                         pos: 1,
                     }
@@ -201,7 +200,7 @@
                 if(this.seleceEndingName != "未选择"){
                     var obje = {
                         videoPath: this.seleceEndingName,
-                        outPath: vendingPath,
+                        outPath: vt.getCurrentPath()+vendingPath,
                         videoSize: this.videoSize,
                         pos: 2,
                     }
@@ -254,37 +253,26 @@
             oneVideo(obj, cabk){
                 var thia = this;
                 //删除文件
-                if(vt.fsExistsSync(obj.outPath)) {
-                    vt.fsUnlinkSync(obj.outPath);
-                }
-                var objper = {
-                    name: obj.videoPath,
-                    percent: 0
-                }
-                vt.getVideoDuration(obj.videoPath, function (ee) {
-                    process.nextTick(function () {
-                        vt.toChangeVideoCoding(obj, function (ob) {
-                            console.log("Dur: " + ee + "  " + ob)
-                            if (vt.getRunVideoTime(ob) != null) {
-                                var pa = vt.getRunVideoTime(ob) / ee;
-                                thia.percent = Math.round(pa * 100) >= 100 ? 100 : Math.round(pa * 100);
-                                objper.percent = thia.percent
-                            }
+                if(vt.fsExistsSync(obj.outPath)) {vt.fsUnlinkSync(obj.outPath);}
+                var objper = { name: obj.videoPath, percent: 0 }
+                let duration = 0;
+                vt.getFfmpeg(obj.videoPath).fps(25).size(obj.videoSize.replace("*", "x")).audioFrequency(48000)
+                    .on('codecData', function(data) {
+                        duration = vt.toSecond(data.duration);
+                    }).on('error', function(err, stdout, stderr) {
+                        thia.$Notice.error({ title: '转码错误' });
+                    }).on('progress', function(progress) {
+                        let per = (vt.toSecond(progress.timemark) / duration) * 100;
+                        if(per > 100){
+                            per = 100;
+                        }
+                        objper.percent = Math.round(per)
 
-                            if (ob.name == "end") {
-                                thia.$Notice.success({
-                                    title: '转换成功'
-                                });
-                                if(cabk != null){
-                                    cabk(ob.path);
-                                }
-
-                            }
-                        })
-                    })
-                });
+                    }).on('end', function() {
+                        thia.$Notice.success({ title: '转码成功' });
+                        cabk();
+                    }).save(obj.outPath);
                 thia.percentData.unshift(objper);
-
             },
             //开始处理视频
             onStartBineVideo(vpath, savep, obList){
@@ -292,37 +280,26 @@
                 var thia = this;
                 var obje = {
                     videoPath: vpath,
-                    outPath: vtempPath,
+                    outPath: vt.getCurrentPath()+vtempPath,
                     videoSize: this.videoSize,
                 };
                 var vheList = obList;
                 this.oneVideo(obje, function () {
                     thia.writeTxtStr(vheList);
                     //删除文件
-                    if(vt.fsExistsSync(thia.seleSaveText)) {
-                        vt.fsUnlinkSync(thia.seleSaveText);
-                    }
-                    console.log("合并视频。。。。。。。。");
-                    console.log("AAA: "+ savep);
-                    var objparm = {
-                        param:  ['-f', 'concat', '-i' , vbine, '-c', 'copy', savep]
-                    }
+                    if(vt.fsExistsSync(thia.seleSaveText)) { vt.fsUnlinkSync(thia.seleSaveText); }
+                    var objparm = { param:  ['-f', 'concat', '-safe','0','-i' , path.join(vt.getCurrentPath()+vbine), '-c', 'copy', path.join(savep)] }
                     vt.toSpawn(objparm, function (event) {
                         //视频合并完成
                         if(event.name == "end"){
                             if(!thia.inputName){
-                                vt.fsUnlinkSync(vheadPath);
-                                vt.fsUnlinkSync(vendingPath);
+                                vt.fsUnlinkSync(vt.getCurrentPath()+vheadPath);
+                                vt.fsUnlinkSync(vt.getCurrentPath()+vendingPath);
                             }
-                            vt.fsUnlinkSync(vtempPath);
-                            thia.$Notice.success({
-                                title: '视频合并完成',
-                                desc: thia.seleSaveText+ " 合并成功"
-                            });
+                            vt.fsUnlinkSync(vt.getCurrentPath()+vtempPath);
+                            thia.$Notice.success({ title: '视频合并完成', desc: thia.seleSaveText+ " 合并成功" });
                             deferred.resolve( "视频合并完成：");
-                            if(!thia.inputName){
-                                thia.isBtnkey = false;
-                            }
+                            if(!thia.inputName){thia.isBtnkey = false;}
                             data.setIsClikcMenu(true);
                         }
                     })
@@ -333,29 +310,22 @@
                 var txtStr = '';
                 if(vPath.length == 1){
                     if(vPath[0].pos == 1){
-                        txtStr = "file "+ "'"+vheadPath + "'" + "\n"+ "file "+ "'"+ vtempPath + "'"
+                        txtStr = "file "+ "'"+path.join(vt.getCurrentPath()+vheadPath)
+                            + "'" + "\n"+ "file "+ "'"+ path.join(vt.getCurrentPath()+vtempPath) + "'"
                     }else if(vPath[0].pos == 2){
-                        txtStr = "file "+ "'"+ vtempPath + "'" + "\n" + "file " + "'"+vendingPath+ "'"
+                        txtStr = "file "+ "'"+ path.join(vt.getCurrentPath()+vtempPath)
+                            + "'" + "\n" + "file " + "'"+path.join(vt.getCurrentPath()+vendingPath)+ "'"
                     }
                 }
                 if(vPath.length == 2){
-                    txtStr = "file "+ "'"+vheadPath + "'" + "\n"+ "file "+ "'"+ vtempPath + "'" + "\n" + "file " + "'"+vendingPath+ "'"
+                    txtStr = "file "+ "'"+path.join(vt.getCurrentPath()+vheadPath)
+                        + "'" + "\n"+ "file "+ "'"+path.join( vt.getCurrentPath()+vtempPath) + "'" + "\n" + "file " + "'"+path.join(vt.getCurrentPath()+vendingPath)+ "'"
                 }
-                fs.writeFileSync(vbine, txtStr);
+                fs.writeFileSync(path.join(vt.getCurrentPath()+vbine), txtStr);
             },
             ontest(){
-
-                var objparm = {
-                    param:  ['-i', this.seleceHeadName]
-                }
-                vt.toSpawn(objparm, function (event) {
-                    //视频合并完成
-                    if(event.name == "end"){
-
-                    }
-                })
+                console.log(Math.round(7.30));
             },
-
         }
     }
 </script>

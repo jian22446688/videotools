@@ -21,7 +21,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 750,
     useContentSize: true,
-    width: 1000
+    width: 1000,
   })
 
   mainWindow.loadURL(winURL),
@@ -58,7 +58,6 @@ ipc.on('open-file-dialog', function (event) {
  */
 ipc.on('openfileeven', function (event, arg) {
     dialog.showOpenDialog(mainWindow, {
-        properties: ['openFile', 'openDirectory']
     }, function (files) {
         if (files) event.sender.send(arg, files)
     })
@@ -81,6 +80,11 @@ ipc.on('openselectcustumfile', function (event, arg) {
         if (files) event.sender.send(arg.event, arg)
     })
 })
+
+ipc.on('opentest', function (event, arg) {
+    var apppath = app.getAppPath();
+    event.sender.send(arg, apppath);
+});
 
 
 

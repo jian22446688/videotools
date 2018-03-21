@@ -1,31 +1,50 @@
 /**
  * Created by Cary on 2018/3/9.
  */
-var fs = require('fs');
-var path = require('path');
-var crypto = require('crypto');
-var spawn = require('child_process').spawn;
-var spawnSync = require('child_process').spawnSync;
-var exec = require('child_process').exec;
-var execSync = require('child_process').execSync;
-var queuefun = require('queue-fun');
-var Queue = queuefun.Queue(); //初始化Promise异步队列类
-var q = queuefun.Q;  //配合使用的Promise流程控制类，也可以使用q.js代替
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const spawn = require('child_process').spawn;
+const spawnSync = require('child_process').spawnSync;
+const exec = require('child_process').exec;
+const execSync = require('child_process').execSync;
+const queuefun = require('queue-fun');
+const ffmpegcom = require('fluent-ffmpeg');
+const Queue = queuefun.Queue(); //初始化Promise异步队列类
+const q = queuefun.Q;  //配合使用的Promise流程控制类，也可以使用q.js代替
 
 //实列化一个最大并发为1的队列
-var queue1 = new Queue(5);
+const queue1 = new Queue(5);
 
 //当前视频处理工具路径
-var currentPath = path.resolve(__dirname, './') + '/';
+const currentPath = path.resolve(__dirname, './') + '/';
 
-var currentPatha = path.resolve(__dirname, '../') + '/';
+var currentPatha = process.cwd() + "/static/";
+
 //ffmpeg 绝对路径
 var ffmpegPath = currentPatha + 'ffmpeg';
 
-
-
 export default {
     /*********************************工具类方法***********************************************/
+    setCurrentPath(path){
+        // noinspection JSAnnotator
+        currentPatha = path
+        if(process.platform == "win32"){
+            ffmpegPath = currentPatha + 'ffmpeg.exe';
+        }else{
+            ffmpegPath = currentPatha + 'ffmpeg';
+        }
+        ffmpegcom.setFfmpegPath(ffmpegPath);
+    },
+    getCurrentPath(){
+        return currentPatha;
+    },
+    getFfmpeg(par){
+        return ffmpegcom(par);
+    },
+    getP(){
+        return path.sep;
+    },
     /**
      * 同步检查文件是否存在
      * @param path
@@ -75,7 +94,7 @@ export default {
         var results = []
         var list = fs.readdirSync(dir)
         list.forEach(function(file) {
-            file = dir + '/' + file
+            file = dir + path.sep + file
             var stat = fs.statSync(file)
             if (stat && stat.isDirectory()) {
             } else {
@@ -302,6 +321,9 @@ export default {
         return this.toSecond(ts);
     },
 
+    test(pathaa){
+        return path.basename(pathaa);
+    },
 
 
 }
