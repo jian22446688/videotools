@@ -248,15 +248,16 @@
                 if(vt.fsExistsSync(savepath)) {vt.fsUnlinkSync(savepath);}
                 var objper = { name: savepath, percent: 0 }
                 let duration = 0;
-                vt.getFfmpeg(path.join(selefile)).outputOptions(
-                    '-vf',"movie="+ path.join(logofile) +"  [logo]; [in][logo] overlay="+ thia.inLogoX +":"+ thia.inLogoY +" [out]",
-                ).on('error', function(err, stdout, stderr) {
+                // -acodec copy-vcodec copy
+                vt.getFfmpeg(path.join(selefile))
+                    .outputOptions(
+                        '-i',path.join(logofile), '-filter_complex', 'overlay='+ thia.inLogoX +':'+thia.inLogoY
+                    ).on('error', function(err, stdout, stderr) {
                     thia.$Notice.error({ title: '转换失败', desc: " 转换失败：" + path.basename(selefile) });
                     deferred.resolve( "导出错误：");
                     this.isBtnkey = false;
                     cdata.setIsClikcMenu(true);
                 }).on('codecData', function(data) {
-                    console.log(data)
                     duration = vt.toSecond(data.duration);
                 }).on('progress', function(progress) {
                     objper.percent = Math.round((vt.toSecond(progress.timemark) / duration) * 100)
