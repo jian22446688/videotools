@@ -14,6 +14,10 @@
                     <Radio label="10"></Radio>
                 </RadioGroup>
             </div>
+            <div v-if="is_win_selectfile" class="c-objpadding">
+                <span>是否选择文件夹</span>
+                <i-switch v-model="is_win_switch"></i-switch>
+            </div>
             <Button :disabled="isBtnkey" class="c-objpadding" @click="onSelectFile">选择文件</Button>
             <span :style="{marginLeft: '8px'}" v-text="seleceName"></span>
             <div>
@@ -35,8 +39,6 @@
             </div>
 
             <Button :disabled="isBtnkey" class="c-objpadding" style="display: block" type="primary" size="large" @click="onstart">开始</Button>
-           
-            
             <div v-if="inputName" class="c-objpadding">
                 <span>转换完成是否打开文件夹</span>
                 <i-switch v-model="isOpenfile"></i-switch>
@@ -70,6 +72,8 @@
               percent: 0,
               inputFileName: "",
               inputName: false,
+              is_win_selectfile: false,
+              is_win_switch: false,
               seleSaveText: "",
               selecSavePath: "",
               isOpenfile: false,
@@ -114,11 +118,22 @@
         created() {
 
         },
+        mounted() {
+            if(process.platform == "win32"){
+                this.is_win_selectfile = true;
+            }else {
+                this.is_win_selectfile = false;
+            }
+        },
         methods: {
             onSelectFile(){
                 var en = "selefile";
                 var thia = this;
-                this.$electron.ipcRenderer.send(cdata.getOpenFileMeaStr(), en);
+                var even = cdata.getOpenFileMeaStr();
+                if(this.is_win_switch){
+                    even = cdata.getOpenSelectdirectory();
+                }
+                this.$electron.ipcRenderer.send(even, en);
                 this.$electron.ipcRenderer.on(en, function (event, patha) {
                     thia.seleceName = patha[0];
                     var basename = path.basename(patha[0], path.extname(patha[0]));

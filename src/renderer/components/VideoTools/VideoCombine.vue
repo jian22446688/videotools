@@ -11,6 +11,10 @@
                <Button :disabled="isBtnkey" class="c-objpadding" @click="onSelectEndingFile">选择片尾文件</Button>
                <span :style="{marginLeft: '8px'}" v-text="seleceEndingName"></span>
            </div>
+            <div v-if="is_win_selectfile" class="c-objpadding">
+                <span>是否选择文件夹</span>
+                <i-switch v-model="is_win_switch"></i-switch>
+            </div>
             <div>
                 <Button :disabled="isBtnkey" class="c-objpadding" @click="onSelectVideoFile">选择视频文件</Button>
                 <span :style="{marginLeft: '8px'}" v-text="seleceVideoName"></span>
@@ -74,6 +78,8 @@
                 selecSavePath: "",
                 inputFileName: "",
                 inputName: false,
+                is_win_selectfile: false,
+                is_win_switch: false,
                 isOpenfile: false,
                 isBtnkey: false,
                 percentTable: [
@@ -112,7 +118,11 @@
 
         },
         mounted() {
-
+            if(process.platform == "win32"){
+                this.is_win_selectfile = true;
+            }else {
+                this.is_win_selectfile = false;
+            }
         },
         methods: {
             //选择片头
@@ -144,7 +154,11 @@
             onSelectVideoFile(){
                 var thia = this;
                 var en = 'selecustumfilec';
-                this.$electron.ipcRenderer.send(data.getOpenFileMeaStr(), en);
+                var even = data.getOpenFileMeaStr();
+                if(this.is_win_switch){
+                    even = data.getOpenSelectdirectory();
+                }
+                this.$electron.ipcRenderer.send(even, en);
                 this.$electron.ipcRenderer.once(en, function (event, patha) {
                     thia.seleceVideoName = patha[0];
                     if(!vt.fsStatIsDirSync(thia.seleceVideoName)){

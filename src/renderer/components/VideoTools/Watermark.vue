@@ -14,6 +14,10 @@
                     <Radio label="10"></Radio>
                 </RadioGroup>
             </div>
+            <div v-if="is_win_selectfile" class="c-objpadding">
+                <span>是否选择文件夹</span>
+                <i-switch v-model="is_win_switch"></i-switch>
+            </div>
             <Button :disabled="isBtnkey" class="c-objpadding" @click="onSelectFile">选择文件</Button>
             <span :style="{marginLeft: '8px'}" v-text="seleceName"></span>
             <div>
@@ -75,6 +79,8 @@
                 theme3: 'light',
                 percent: 0,
                 inputFileName: "",
+                is_win_selectfile: false,
+                is_win_switch: false,
                 inputName: false,
                 seleSaveText: "",
                 selecSavePath: "",
@@ -118,7 +124,11 @@
 
         },
         mounted() {
-
+            if(process.platform == "win32"){
+                this.is_win_selectfile = true;
+            }else {
+                this.is_win_selectfile = false;
+            }
         },
         watch: {
 
@@ -127,7 +137,11 @@
             onSelectFile(){
                 var en = "selefile";
                 var thia = this;
-                this.$electron.ipcRenderer.send(cdata.getOpenFileMeaStr(), en);
+                var even = cdata.getOpenFileMeaStr();
+                if(this.is_win_switch){
+                    even = cdata.getOpenSelectdirectory();
+                }
+                this.$electron.ipcRenderer.send(even, en);
                 this.$electron.ipcRenderer.once(en, function (event, patha) {
                     thia.seleceName = patha[0];
                     var basename = path.basename(patha[0], path.extname(patha[0]));
