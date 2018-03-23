@@ -228,7 +228,7 @@
                         thia.$electron.shell.showItemInFolder(thia.seleSaveText);
                     }
                     thia.isBtnkey = false;
-                    date.setIsClikcMenu(true);
+                    data.setIsClikcMenu(true);
                 })
                 objes.forEach(function (obe) {
                     thia.oneVideo(obe, function (pa) {
@@ -276,7 +276,7 @@
                     }).on('error', function(err, stdout, stderr) {
                         thia.$Notice.error({ title: '转码错误' });
                     thia.isBtnkey = false;
-                    date.setIsClikcMenu(true);
+                    data.setIsClikcMenu(true);
                     }).on('progress', function(progress) {
                         let per = (vt.toSecond(progress.timemark) / duration) * 100;
                         if(per > 100){
