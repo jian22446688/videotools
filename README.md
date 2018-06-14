@@ -11,11 +11,11 @@
 
 ### 应用截图
 
-	![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/1.jpg)
+![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/1.jpg)
 
-	![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/2.jpg)
+![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/2.jpg)
 
-	![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/3.jpg)
+![img info](https://raw.githubusercontent.com/jian22446688/videotools/master/screenshot/3.jpg)
 
 
 #### Build Setup
